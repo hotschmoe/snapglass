@@ -1,0 +1,20 @@
+Self test...
+Loading state from /var/snapraid.content...
+Using 123456 MiB of memory.
+
+SnapRAID status report:
+Last sync: 2026-06-20 03:14:00 +0000
+
+Disk d1: ok
+  mount: /srv/disk1
+  scrub: 2026-06-12, 98%
+
+Disk d2: warning
+  mount: /srv/disk2
+  scrub: 2026-04-20, 92%
+
+Disk d3: ok
+  mount: /srv/disk3
+  scrub: 2026-06-01, 100%
+
+No sync is in progress.
