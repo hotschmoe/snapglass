@@ -118,18 +118,20 @@ fn render_disks(frame: &mut ratatui::Frame<'_>, app: &TuiApp, area: ratatui::lay
                 .disks
                 .iter()
                 .map(|disk| {
-                    let scrub = disk
-                        .last_scrub
-                        .map(|date| date.to_string())
-                        .unwrap_or_else(|| "unknown".to_owned());
-                    let age = disk
-                        .scrub_age_days
-                        .map(|days| format!("{days}d"))
-                        .unwrap_or_else(|| "unknown".to_owned());
-                    let marker = if disk.scrub_stale { "STALE" } else { "ok" };
                     ListItem::new(format!(
-                        "{}  {:?}  scrub {} ({})  {}  {}",
-                        disk.name, disk.status, scrub, age, marker, disk.path
+                        "{}  {:?}  files {}  frag {}  use {}  {}",
+                        disk.name,
+                        disk.status,
+                        disk.files
+                            .map(|value| value.to_string())
+                            .unwrap_or_else(|| "unknown".to_owned()),
+                        disk.fragmented_files
+                            .map(|value| value.to_string())
+                            .unwrap_or_else(|| "unknown".to_owned()),
+                        disk.use_percent
+                            .map(|value| format!("{value}%"))
+                            .unwrap_or_else(|| "unknown".to_owned()),
+                        disk.path
                     ))
                 })
                 .collect::<Vec<_>>()
@@ -152,6 +154,39 @@ fn render_parity(frame: &mut ratatui::Frame<'_>, app: &TuiApp, area: ratatui::la
             .map(|dt| dt.to_rfc3339())
             .unwrap_or_else(|| "unknown".to_owned())
     )));
+    if let Some(array) = &app.array {
+        lines.push(Line::from(format!("health: {:?}", array.health)));
+        lines.push(Line::from(format!(
+            "sync: {}",
+            match (array.sync_in_progress, array.fully_synced) {
+                (Some(true), _) => "in progress",
+                (_, Some(false)) => "not fully synced",
+                (Some(false), Some(true)) => "idle, fully synced",
+                (Some(false), _) => "idle",
+                _ => "unknown",
+            }
+        )));
+        lines.push(Line::from(format!(
+            "scrub: {}% unscrubbed, oldest {}, {}",
+            array
+                .scrub
+                .unscrubbed_percent
+                .map(|percent| percent.to_string())
+                .unwrap_or_else(|| "unknown".to_owned()),
+            array
+                .scrub
+                .oldest_days
+                .map(|days| format!("{days}d"))
+                .unwrap_or_else(|| "unknown".to_owned()),
+            if array.scrub.stale { "STALE" } else { "ok" }
+        )));
+        lines.extend(
+            array
+                .messages
+                .iter()
+                .map(|message| Line::from(format!("message: {message}"))),
+        );
+    }
     lines.push(Line::from(""));
     lines.extend(
         app.config

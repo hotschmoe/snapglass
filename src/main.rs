@@ -99,6 +99,45 @@ fn print_status(state: &model::ArrayState) {
     println!("data disks: {}", state.disks.len());
     println!("parity files: {}", state.config.parity.len());
     println!("content files: {}", state.config.content.len());
+    println!("health: {:?}", state.health);
+    println!(
+        "sync: {}",
+        match (state.sync_in_progress, state.fully_synced) {
+            (Some(true), _) => "in progress",
+            (_, Some(false)) => "not fully synced",
+            (Some(false), Some(true)) => "idle, fully synced",
+            (Some(false), _) => "idle",
+            _ => "unknown",
+        }
+    );
+    println!(
+        "scrub: {}% unscrubbed, oldest {}, median {}, newest {}, {}",
+        state
+            .scrub
+            .unscrubbed_percent
+            .map(|percent| percent.to_string())
+            .unwrap_or_else(|| "unknown".to_owned()),
+        state
+            .scrub
+            .oldest_days
+            .map(|days| format!("{days} days"))
+            .unwrap_or_else(|| "unknown".to_owned()),
+        state
+            .scrub
+            .median_days
+            .map(|days| format!("{days} days"))
+            .unwrap_or_else(|| "unknown".to_owned()),
+        state
+            .scrub
+            .newest_days
+            .map(|days| format!("{days} days"))
+            .unwrap_or_else(|| "unknown".to_owned()),
+        if state.scrub.stale { "stale" } else { "ok" }
+    );
+
+    for message in &state.messages {
+        println!("message: {message}");
+    }
 
     if let Some(diff) = &state.diff {
         println!(
@@ -115,20 +154,24 @@ fn print_status(state: &model::ArrayState) {
 
     println!();
     for disk in &state.disks {
-        let scrub = disk
-            .last_scrub
-            .map(|date| date.to_string())
-            .unwrap_or_else(|| "unknown".to_owned());
-        let stale = if disk.scrub_stale { "stale" } else { "ok" };
         println!(
-            "{}: {:?}, last scrub {}, scrub age {}, {}",
+            "{}: {:?}, files {}, fragmented {}, excess {}, used {}, free {}, use {}",
             disk.name,
             disk.status,
-            scrub,
-            disk.scrub_age_days
-                .map(|days| format!("{days} days"))
+            disk.files
+                .map(|value| value.to_string())
                 .unwrap_or_else(|| "unknown".to_owned()),
-            stale
+            disk.fragmented_files
+                .map(|value| value.to_string())
+                .unwrap_or_else(|| "unknown".to_owned()),
+            disk.excess_fragments
+                .map(|value| value.to_string())
+                .unwrap_or_else(|| "unknown".to_owned()),
+            disk.used_gb.as_deref().unwrap_or("unknown"),
+            disk.free_gb.as_deref().unwrap_or("unknown"),
+            disk.use_percent
+                .map(|value| format!("{value}%"))
+                .unwrap_or_else(|| "unknown".to_owned())
         );
     }
 }

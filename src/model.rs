@@ -1,6 +1,6 @@
 //! Shared domain models for parsed snapRAID and snapglass state.
 
-use chrono::{DateTime, NaiveDate, Utc};
+use chrono::{DateTime, Utc};
 
 use crate::config::SnapraidConfig;
 
@@ -22,6 +22,12 @@ impl ExitCode {
 pub struct ArrayState {
     pub config: SnapraidConfig,
     pub last_sync: Option<DateTime<Utc>>,
+    pub scrub: ScrubState,
+    pub sync_in_progress: Option<bool>,
+    pub fully_synced: Option<bool>,
+    pub health: ArrayHealth,
+    pub messages: Vec<String>,
+    pub error_count: Option<u64>,
     pub disks: Vec<DiskState>,
     pub diff: Option<DiffSummary>,
 }
@@ -38,16 +44,36 @@ pub struct DiskState {
     pub name: String,
     pub path: String,
     pub status: DiskStatus,
-    pub last_scrub: Option<NaiveDate>,
-    pub scrub_age_days: Option<i64>,
-    pub scrub_stale: bool,
+    pub files: Option<u64>,
+    pub fragmented_files: Option<u64>,
+    pub excess_fragments: Option<u64>,
+    pub wasted_gb: Option<String>,
+    pub used_gb: Option<String>,
+    pub free_gb: Option<String>,
+    pub use_percent: Option<u8>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DiskStatus {
     Ok,
+    Unknown,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ScrubState {
+    pub unscrubbed_percent: Option<u8>,
+    pub oldest_days: Option<i64>,
+    pub median_days: Option<i64>,
+    pub newest_days: Option<i64>,
+    pub never_scrubbed: bool,
+    pub stale: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ArrayHealth {
+    Ok,
     Warning,
-    Error,
+    Danger,
     Unknown,
 }
 

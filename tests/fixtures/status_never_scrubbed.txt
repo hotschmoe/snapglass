@@ -1,0 +1,18 @@
+Self test...
+Loading state from /var/snapraid.content...
+Using 92 MiB of memory for the file-system.
+SnapRAID status report:
+
+   Files Fragmented Excess  Wasted  Used    Free  Use Name
+            Files  Fragments     GB      GB      GB
+     101       3       8       -     221     716  24% d1
+      90       0       0       -     199     738  21% d2
+      12       0       0       -      44     893   5% d3
+--------------------------------------------------------------------------
+     203       3       8     0.0     464    2347  16%
+
+100% of the array is not scrubbed.
+WARNING! The array has not been scrubbed.
+
+No sync is in progress.
+No error detected.

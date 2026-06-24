@@ -8,9 +8,9 @@ Built for a single Ubuntu box that replaced an unRAID setup. Personal tool, not 
 
 ## Why
 
-`snapraid status` and `snapraid diff` give you everything, but as walls of text you have to
+`snapraid status` and `snapraid diff` give you a lot, but as walls of text you have to
 re-read every time. snapglass parses that output (and the snapRAID config) into a glanceable
-dashboard: parity health, sync drift, scrub age per disk, and the diff summary before you commit
+dashboard: parity health, sync drift, array scrub age, and the diff summary before you commit
 to a sync.
 
 It does **not** run destructive operations for you by default. Sync, scrub, and fix stay opt-in
@@ -18,13 +18,13 @@ and explicit.
 
 ## Features
 
-- `snapglass status` — one-screen summary: disks, parity drives, last sync, last scrub, drift.
+- `snapglass status` — one-screen summary: disks, parity drives, scrub freshness, drift.
 - `snapglass diff` — parsed `snapraid diff`: added / removed / updated / moved / copied counts,
   with the danger flag if removals exceed your configured threshold.
-- `snapglass tui` — live TUI: per-disk scrub age heatmap, parity status, pending diff, with
+- `snapglass tui` — live TUI: data-disk table metrics, array scrub age, parity status, pending diff, with
   keybindings to trigger a sync/scrub (with confirmation).
 - Reads `/etc/snapraid.conf` to discover data disks, parity, and content files — no duplicate config.
-- Scrub-age tracking: highlights disks whose last scrub is older than your chosen window.
+- Scrub-age tracking: highlights when the array-wide oldest scrubbed block is older than your chosen window.
 
 ## Non-goals
 
