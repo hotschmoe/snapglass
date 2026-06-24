@@ -39,7 +39,10 @@ enum Command {
         #[arg(long, default_value_t = 200)]
         threshold: u64,
     },
-    Tui,
+    Tui {
+        #[arg(long, default_value_t = 200)]
+        threshold: u64,
+    },
 }
 
 fn main() {
@@ -80,8 +83,14 @@ fn run<R: SnapraidRunner>(cli: Cli, runner: &R) -> anyhow::Result<ExitCode> {
             print_diff(&diff, threshold);
             Ok(diff.exit_code(threshold))
         }
-        Command::Tui => {
-            tui::run_tui(runner, &cli.config, config, cli.scrub_window_days)?;
+        Command::Tui { threshold } => {
+            tui::run_tui(
+                runner,
+                &cli.config,
+                config,
+                cli.scrub_window_days,
+                threshold,
+            )?;
             Ok(ExitCode::InSync)
         }
     }

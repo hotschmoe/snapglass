@@ -24,7 +24,10 @@ and explicit.
 - `snapglass tui` — live TUI: data-disk table metrics, array scrub age, parity status, pending diff, with
   keybindings to trigger a sync/scrub (with confirmation).
 - Reads `/etc/snapraid.conf` to discover data disks, parity, and content files — no duplicate config.
-- Scrub-age tracking: highlights when the array-wide oldest scrubbed block is older than your chosen window.
+- Array-wide scrub-age tracking: a gauge for the unscrubbed percentage plus an
+  oldest / median / newest age band, each colored against your chosen freshness
+  window, with a FRESH / STALE / NEVER SCRUBBED chip. (Scrub age is array-wide,
+  not a per-disk heatmap.)
 
 ## Non-goals
 
@@ -70,14 +73,21 @@ something actually needs attention.
 
 ## TUI keys
 
-| Key       | Action                              |
-|-----------|-------------------------------------|
-| `s`       | Run `snapraid sync` (confirm)       |
-| `c`       | Run `snapraid scrub` (confirm)      |
-| `d`       | Refresh diff                        |
-| `r`       | Refresh all status                  |
-| `tab`     | Cycle panes (disks / parity / diff) |
-| `q`       | Quit                                |
+All three panes (disks, parity/scrub, diff) are shown at once; `tab` moves the
+focus (bright border) between them rather than swapping what's visible.
+
+| Key       | Action                                          |
+|-----------|-------------------------------------------------|
+| `s`       | Run `snapraid sync` (modal confirm)             |
+| `c`       | Run `snapraid scrub` (modal confirm)            |
+| `d`       | Refresh diff                                    |
+| `r`       | Refresh all status                              |
+| `tab`     | Move focus between panes (disks / parity / diff)|
+| `↑` / `↓` | Move the disk-table cursor (Disks pane focused) |
+| `q`       | Quit                                            |
+
+`snapglass tui --threshold N` sets the risky-change threshold that turns the diff
+pane and health banner red (default 200, matching `snapglass diff`).
 
 ## Suggested systemd timer
 
